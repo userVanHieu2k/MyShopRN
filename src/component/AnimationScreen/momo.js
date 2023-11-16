@@ -99,7 +99,7 @@ const Momo = () => {
   };
   return (
     <View style={style.container}>
-      {/* <StatusBar barStyle={'light-content'} />
+      <StatusBar barStyle={'light-content'} />
       <SafeAreaView>
         <View style={style.upperHeaderPlaceHodler}></View>
       </SafeAreaView>
@@ -188,7 +188,7 @@ const Momo = () => {
         scrollEventThrottle={16}>
         <View style={style.paddingForHeader}></View>
         <View style={style.scrollViewContent}></View>
-      </ScrollView> */}
+      </ScrollView>
     </View>
   );
 };
