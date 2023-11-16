@@ -1,11 +1,12 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
-const AboutScreen = () => {
+const AboutScreen = ({navigation}) => {
     return (
         <View>
             <Text style={styles.font}>AboutScreen</Text>
             <Text>AboutScreen</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('List')}><Text>List</Text></TouchableOpacity>
         </View>
     )
 };

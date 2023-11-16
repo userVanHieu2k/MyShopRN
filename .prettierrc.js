@@ -5,3 +5,8 @@ module.exports = {
   singleQuote: true,
   trailingComma: 'all',
 };
+// module.exports = {
+//   jsxBracketSameLine: true,
+//   singleQuote: true,
+//   trailingComma: 'all',
+// };

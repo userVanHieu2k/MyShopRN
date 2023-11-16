@@ -7,6 +7,7 @@ import {
   Text,
   Button,
   View,
+  TouchableOpacity,
 } from 'react-native';
 
 const HomeScreen = ({navigation}) => {
@@ -17,24 +18,32 @@ const HomeScreen = ({navigation}) => {
   //       }
   // }, [route.params?.post])
   return (
-    <View>
-      <Text>Hieu Nguyen Van </Text>
-      {/* <Text style={{ margin: 10 }}>Post: {route.params?.post}</Text> */}
-      <Button
-        title="Go to Details"
-        onPress={() => {
-          /* 1. Navigate to the Details route with params */
-          navigation.navigate('Detail', {
-            user: {
-              id: 'jane',
-              firstName: 'Jane',
-              lastName: 'Done',
-              age: 25,
-            }
-          });
-        }}
-      />
-    </View>
+    <SafeAreaView>
+      <View>
+        <Text>Hieu Nguyen Van </Text>
+        {/* <Text style={{ margin: 10 }}>Post: {route.params?.post}</Text> */}
+        <Button
+          title="Go to Details"
+          onPress={() => {
+            /* 1. Navigate to the Details route with params */
+            navigation.navigate('Detail', {
+              user: {
+                id: 'jane',
+                firstName: 'Jane',
+                lastName: 'Done',
+                age: 25,
+              },
+            });
+          }}
+        />
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('Demo');
+          }}>
+          <Text>Demo PanResponder</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 };
 
