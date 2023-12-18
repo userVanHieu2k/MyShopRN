@@ -1,13 +1,14 @@
 import React, {Component} from 'react';
 import {
   FlatList,
-  SafeAreaView,
+  TextInput,
   StyleSheet,
   Text,
-  TextInput,
   View,
   TouchableOpacity,
   Alert,
+  ScrollView,
+  Image,
 } from 'react-native';
 import data from '../data/dishes.js';
 import gui from '../lib/gui';
@@ -20,24 +21,68 @@ class HomeScreen extends Component {
     this.state = {
       stepID: 1,
       medalName: '',
+      people: 0,
+      restaurentName: '',
+      newDist: {
+        dist: '',
+        number: 1,
+      },
+      listDist: [
+        {
+          dist: '',
+          number: 1,
+        },
+      ],
+      RnewDist: {
+        dist: '',
+        number: 1,
+      },
     };
   }
 
-  componentDidMount() {
-    // const group = this.groupDishesByMeal(data.dishes);
-    // console.log(this.state.medals);
-  }
+  componentDidMount() {}
 
   nextStep = () => {
-    this.setState({stepID: this.state.stepID + 1});
+    let {stepID, listDist, people} = this.state;
+    if (stepID == 1 && this.state.medalName == '') {
+      Alert.alert('Vui lòng chọn bữa ăn');
+      return;
+    }
+    if (stepID == 1 && parseInt(people) > 10) {
+      Alert.alert('Nhập tối đa 10 người');
+      return;
+    }
+    if (stepID == 1 && people < 1) {
+      Alert.alert('Vui lòng chọn số lượng người ăn');
+      return;
+    } else if (stepID == 2 && this.state.restaurentName == '') {
+      Alert.alert('Vui lòng chọn nhà hàng');
+      return;
+    } else if (stepID == 3) {
+      let sum = 0;
+      for (let i = 0; i < listDist.length; i++) {
+        sum = sum + parseInt(listDist[i].number);
+        if (listDist[i].dist == '') {
+          Alert.alert('Vui lòng chọn nhà hàng');
+          return;
+        }
+      }
+      if (sum < people) {
+        console.log(people, sum);
+        Alert.alert(`Chưa đủ số khẩu phần ăn(Tổng ${people} người)`);
+        return;
+      } else this.setState({stepID: stepID + 1});
+    } else this.setState({stepID: stepID + 1});
   };
   PreviousStep = () => {
     this.setState({stepID: this.state.stepID - 1});
   };
 
   groupDishesByMeal = dishes => {
+    let {stepID, medalName, listDist, restaurentName, RnewDist, people} =
+      this.state;
     const groupedDishes = {};
-
+    const groupRestqaurent = {};
     const medals = [];
 
     // Lặp qua danh sách món ăn
@@ -55,7 +100,7 @@ class HomeScreen extends Component {
         groupedDishes[meal].push(dish);
       });
     });
-    if (this.state.stepID == 1) {
+    if (stepID == 1) {
       return (
         <View style={{marginTop: 20}}>
           <SelectDropdown
@@ -72,51 +117,90 @@ class HomeScreen extends Component {
             }}
             required={false}
           />
-          <Text style={style.textPeople}>Please enter number of people</Text>
-          <TextInput
-            style={{width: gui.screenWidth - 172}}
-            value={1}
-            placeholder="Tìm kiếm(tên đại lý)"
-            placeholderTextColor={'#D9D9D9'}
-            keyExtractor={'numberic'}
-            // onChangeText={text => this.searchData(text)}
-            underlineColorAndroid={'transparent'}
-          />
-          <View style={style.viewButton}>
-            <TouchableOpacity
-              onPress={() => this.nextStep()}
-              style={style.sendButton}>
-              <Text style={[style.textNext, {color: 'white'}]}>Next</Text>
-            </TouchableOpacity>
+          <Text style={style.textPeople}>
+            Please enter number of people(Max 10)
+          </Text>
+          <View>
+            <TextInput
+              style={style.input}
+              onChangeText={text => {
+                this.setState({people: text});
+              }}
+              value={people}
+              placeholder="Chọn số lượng"
+              keyboardType="numeric"
+            />
+            <View style={{position: 'absolute', right: 0}}>
+              <TouchableOpacity
+                onPress={() => {
+                  const num = (parseInt(people) + 1).toString();
+                  this.setState({
+                    people: num,
+                  });
+                }}>
+                <Image
+                  source={require('../assets/image/upInv.png')}
+                  style={[style.dropIcon, {top: 10}]}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  const num = (parseInt(people) - 1).toString();
+                  this.setState({
+                    people: num,
+                  });
+                }}>
+                <Image
+                  source={require('../assets/image/icon_drop.png')}
+                  style={style.dropIcon}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <View style={style.viewButton}>
+              <TouchableOpacity
+                onPress={() => this.nextStep()}
+                style={style.sendButton}>
+                <Text style={[style.textNext, {color: 'white'}]}>Next</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       );
-    } else if (this.state.stepID == 2) {
+    } else if (stepID == 2) {
+      const RlistDist = [
+        {
+          dist: '',
+          number: 1,
+        },
+      ];
+      const restaurent = [];
+
+      groupedDishes[medalName].forEach(dish => {
+        const nameRes = dish.restaurant;
+        if (!groupRestqaurent[nameRes]) {
+          groupRestqaurent[nameRes] = [];
+          restaurent.push(nameRes);
+        }
+        groupRestqaurent[nameRes].push(dish);
+      });
+      // console.log(groupRestqaurent);
       return (
         <View style={{marginTop: 20}}>
           <SelectDropdown
-            title="Please select a medal"
+            title="Please select a restaurent"
             styleContainer={{width: gui.screenWidth - 40, marginTop: 8}}
             titleStyle={[style.textNoteTitle, {marginLeft: 0}]}
-            data={medals}
+            data={restaurent}
             placeholder={'---'}
-            value={this.state.medalName}
+            value={this.state.restaurentName}
             setValue={selectedItem => {
               this.setState({
-                medalName: selectedItem,
+                restaurentName: selectedItem,
+                listDist: RlistDist,
               });
             }}
             required={false}
-          />
-          <Text style={style.textPeople}>Please enter number of people</Text>
-          <TextInput
-            style={{width: gui.screenWidth - 172}}
-            value={1}
-            placeholder="Tìm kiếm(tên đại lý)"
-            placeholderTextColor={'#D9D9D9'}
-            keyExtractor={'numberic'}
-            // onChangeText={text => this.searchData(text)}
-            underlineColorAndroid={'transparent'}
           />
           <View style={[style.viewButton, {justifyContent: 'space-between'}]}>
             <TouchableOpacity
@@ -132,33 +216,108 @@ class HomeScreen extends Component {
           </View>
         </View>
       );
-    } else if (this.state.stepID == 3) {
+    } else if (stepID == 3) {
+      const food = [];
+      groupedDishes[medalName].forEach(dish => {
+        const nameRes = dish.restaurant;
+        if (!groupRestqaurent[nameRes]) {
+          groupRestqaurent[nameRes] = [];
+        }
+        groupRestqaurent[nameRes].push(dish);
+      });
+      const group = groupRestqaurent[restaurentName];
+      group.forEach(dish => {
+        const nameFood = dish.name;
+        food.push(nameFood);
+      });
+      // console.log(food);
       return (
-        <View style={{marginTop: 20}}>
-          <SelectDropdown
-            title="Please select a medal"
-            styleContainer={{width: gui.screenWidth - 40, marginTop: 8}}
-            titleStyle={[style.textNoteTitle, {marginLeft: 0}]}
-            data={medals}
-            placeholder={'---'}
-            value={this.state.medalName}
-            setValue={selectedItem => {
-              this.setState({
-                medalName: selectedItem,
-              });
-            }}
-            required={false}
-          />
-          <Text style={style.textPeople}>Please enter number of people</Text>
-          <TextInput
-            style={{width: gui.screenWidth - 172}}
-            value={1}
-            placeholder="Tìm kiếm(tên đại lý)"
-            placeholderTextColor={'#D9D9D9'}
-            keyExtractor={'numberic'}
-            // onChangeText={text => this.searchData(text)}
-            underlineColorAndroid={'transparent'}
-          />
+        <ScrollView>
+          {listDist.length > 0
+            ? listDist.map((item, index) => (
+                <View style={{marginTop: 20}}>
+                  <SelectDropdown
+                    title="Please select a dish"
+                    styleContainer={{
+                      width: gui.screenWidth - 40,
+                      marginTop: 8,
+                    }}
+                    titleStyle={[style.textNoteTitle, {marginLeft: 0}]}
+                    data={food}
+                    placeholder={'---'}
+                    value={item.dist}
+                    setValue={selectedItem => {
+                      let check = false;
+                      listDist.forEach(item => {
+                        if (item.dist == selectedItem) {
+                          check = true;
+                        }
+                      });
+                      if (check) {
+                        Alert.alert('Món ăn này đã được chọn');
+                      } else {
+                        listDist[index].dist = selectedItem;
+                        this.setState({listDist: listDist});
+                      }
+                    }}
+                    required={false}
+                  />
+                  <Text style={style.textPeople}>
+                    Please enter no of servings
+                  </Text>
+                  <View>
+                    <TextInput
+                      style={style.input}
+                      onChangeText={value => {
+                        listDist[index].number = value;
+                        this.setState({listDist: listDist});
+                      }}
+                      defaultValue="1"
+                      placeholder="Chọn số lượng"
+                      value={item.number}
+                      keyboardType="numeric"
+                    />
+                    <View style={{position: 'absolute', right: 0}}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          const num = (parseInt(item.number) + 1).toString();
+                          listDist[index].number = num;
+                          this.setState({listDist: listDist});
+                        }}>
+                        <Image
+                          source={require('../assets/image/upInv.png')}
+                          style={[style.dropIcon, {top: 10}]}
+                        />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => {
+                          const num = (parseInt(item.number) - 1).toString();
+                          listDist[index].number = num;
+                          this.setState({listDist: listDist});
+                        }}>
+                        <Image
+                          source={require('../assets/image/icon_drop.png')}
+                          style={style.dropIcon}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                  {listDist.length == index + 1 ? (
+                    <TouchableOpacity
+                      style={style.boxAdd}
+                      onPress={() => {
+                        listDist.push(this.state.newDist);
+                        this.setState({listDist: listDist, newDist: RnewDist});
+                      }}>
+                      <Image
+                        source={require('../assets/image/plus_main.png')}
+                        style={style.imageAdd}
+                      />
+                    </TouchableOpacity>
+                  ) : null}
+                </View>
+              ))
+            : null}
           <View style={[style.viewButton, {justifyContent: 'space-between'}]}>
             <TouchableOpacity
               onPress={() => this.PreviousStep()}
@@ -171,35 +330,45 @@ class HomeScreen extends Component {
               <Text style={[style.textNext, {color: 'white'}]}>Next</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </ScrollView>
       );
     } else {
       return (
         <View style={{marginTop: 20}}>
-          <SelectDropdown
-            title="Please select a medal"
-            styleContainer={{width: gui.screenWidth - 40, marginTop: 8}}
-            titleStyle={[style.textNoteTitle, {marginLeft: 0}]}
-            data={medals}
-            placeholder={'---'}
-            value={this.state.medalName}
-            setValue={selectedItem => {
-              this.setState({
-                medalName: selectedItem,
-              });
-            }}
-            required={false}
-          />
-          <Text style={style.textPeople}>Please enter number of people</Text>
-          <TextInput
-            style={{width: gui.screenWidth - 172}}
-            value={1}
-            placeholder="Tìm kiếm(tên đại lý)"
-            placeholderTextColor={'#D9D9D9'}
-            keyExtractor={'numberic'}
-            // onChangeText={text => this.searchData(text)}
-            underlineColorAndroid={'transparent'}
-          />
+          <View style={style.tableBill}>
+            <View style={style.columBill}>
+              <Text>Medal</Text>
+              <Text style={[style.textPeople, {marginVertical: 0}]}>
+                {this.state.medalName}
+              </Text>
+            </View>
+            <View style={style.columBill}>
+              <Text>People</Text>
+              <Text style={[style.textPeople, {marginVertical: 0}]}>
+                {this.state.people}
+              </Text>
+            </View>
+            <View style={style.columBill}>
+              <Text>Restaurent</Text>
+              <Text style={[style.textPeople, {marginVertical: 0}]}>
+                {this.state.restaurentName}
+              </Text>
+            </View>
+            <View style={style.columBill}>
+              <Text>Dishes</Text>
+              <View>
+                <FlatList
+                  data={this.state.listDist}
+                  keyExtractor={(item, index) => 'list' + index}
+                  renderItem={item => this.renderlistDist(item)}
+                  removeClippedSubviews={false}
+                  enableEmptySections
+                  showsVerticleScrollIndicator={false}
+                  // contentContainerStyle={{ paddingBottom: 40 }}
+                />
+              </View>
+            </View>
+          </View>
           <View style={[style.viewButton, {justifyContent: 'space-between'}]}>
             <TouchableOpacity
               onPress={() => this.PreviousStep()}
@@ -258,6 +427,17 @@ class HomeScreen extends Component {
       </View>
     );
   }
+  renderlistDist(data) {
+    console.log(data);
+    const item = data.item;
+    return (
+      <View>
+        <Text style={style.textNext}>
+          {item.dist} - {item.number}
+        </Text>
+      </View>
+    );
+  }
 }
 
 const style = StyleSheet.create({
@@ -267,6 +447,7 @@ const style = StyleSheet.create({
     // backgroundColor: '#ffffff',
     marginTop: gui.marginTop + 10,
     paddingHorizontal: 24,
+    marginBottom: 80,
   },
   mainStep: {
     paddingTop: 10,
@@ -296,8 +477,16 @@ const style = StyleSheet.create({
   textPeople: {
     fontSize: 16,
     marginVertical: 10,
+    fontWeight: '500',
+    color: '#505050',
   },
-  viewButton: {flexDirection: 'row', justifyContent: 'flex-end', height: 50},
+  viewButton: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    height: 50,
+    width: gui.screenWidth - 40,
+    marginTop: 20,
+  },
   sendButton: {
     backgroundColor: 'blue',
     width: gui.screenWidth / 2 - 30,
@@ -316,6 +505,45 @@ const style = StyleSheet.create({
   },
   textNext: {
     fontSize: 16,
+  },
+  input: {
+    height: 50,
+    width: gui.screenWidth - 40,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    backgroundColor: 'white',
+  },
+  boxAdd: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 12,
+    marginTop: 10,
+  },
+  imageAdd: {
+    width: 16,
+    height: 16,
+  },
+  tableBill: {
+    width: gui.screenWidth - 40,
+    backgroundColor: '#C6D8F3',
+    padding: 10,
+    borderRadius: 8,
+  },
+  columBill: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  dropIcon: {
+    position: 'absolute',
+    height: 10,
+    width: 18,
+    top: 30,
+    right: 10,
   },
 });
 
