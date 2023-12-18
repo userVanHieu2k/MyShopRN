@@ -17,7 +17,7 @@ class LocalStorage {
   }
 
   getQuyTrinhID() {
-    return AsyncStorage.getItem(storageKeys.QUY_TRINH_ID).then((ret) => {
+    return AsyncStorage.getItem(storageKeys.QUY_TRINH_ID).then(ret => {
       return JSON.parse(ret);
     });
   }
@@ -26,7 +26,7 @@ class LocalStorage {
   }
 
   getTokenID() {
-    return AsyncStorage.getItem(storageKeys.TOKEN_ID).then((ret) => {
+    return AsyncStorage.getItem(storageKeys.TOKEN_ID).then(ret => {
       return JSON.parse(ret);
     });
   }
@@ -38,7 +38,7 @@ class LocalStorage {
     );
   }
   getLoginInfo() {
-    return AsyncStorage.getItem(storageKeys.LOGIN_INFO).then((ret) => {
+    return AsyncStorage.getItem(storageKeys.LOGIN_INFO).then(ret => {
       return JSON.parse(ret);
     });
   }
@@ -54,7 +54,7 @@ class LocalStorage {
   }
 
   getLanguage() {
-    return AsyncStorage.getItem(storageKeys.LANGUAGE_APP).then((res) => {
+    return AsyncStorage.getItem(storageKeys.LANGUAGE_APP).then(res => {
       return JSON.parse(res);
     });
   }
@@ -71,7 +71,7 @@ class LocalStorage {
   }
 
   getInitLaunch() {
-    return AsyncStorage.getItem(storageKeys.INITIAL_LAUNCH).then((res) => {
+    return AsyncStorage.getItem(storageKeys.INITIAL_LAUNCH).then(res => {
       return JSON.parse(res);
     });
   }
