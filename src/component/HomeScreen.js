@@ -113,6 +113,7 @@ class HomeScreen extends Component {
             setValue={selectedItem => {
               this.setState({
                 medalName: selectedItem,
+                restaurentName: '',
               });
             }}
             required={false}
