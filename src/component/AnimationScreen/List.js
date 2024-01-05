@@ -1,182 +1,150 @@
-import React, {useEffect, useRef} from 'react';
+import React from 'react';
 import {
   Animated,
-  Dimensions,
-  FlatList,
+  Easing,
+  SectionList,
+  StatusBar,
+  StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import gui from '../../lib/gui';
-import useFetch from '../customHook/UseFetch';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import {EasingFunction} from 'react-native';
 
 const List = () => {
-  const [data1] = useFetch('https://jsonplaceholder.typicode.com/todos');
-  const data = [
-    {name: 'hieu', age: 19},
-    {name: 'hanh', age: 19},
-    {name: 'huy', age: 19},
-    {name: 'gam', age: 19},
-    {name: 'hoang', age: 19},
-  ];
-  const flastListRef = useRef(null);
-  const [index, setIndex] = React.useState(0);
-  const _colors = {
-    active: `#FCD259ff`,
-    inactive: `#FCD25900`,
-  };
-  const _spacing = 10;
-  console.log('data', data1);
-  useEffect(() => {
-    flastListRef.current?.scrollToIndex({
-      index,
-      animated: true,
-    });
-  }, []);
+  let opacity = new Animated.Value(0);
 
-  renderItem = item => {
-    console.log('item', item);
-    return (
-      <TouchableOpacity onPress={() => {}}>
-        <View
-          style={{
-            marginRight: _spacing,
-            padding: _spacing,
-            borderWidth: 2,
-            borderColor: _colors.active,
-            borderRadius: 12,
-            backgroundColor:
-              index == item.index ? _colors.active : _colors.inactive,
-          }}>
-          <Text style={{color: '#36303F', fontWeight: '700'}}>
-            {item.item.name}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    );
+  const animate = (easing: EasingFunction) => {
+    opacity.setValue(0);
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: 1200,
+      easing,
+      useNativeDriver: true,
+    }).start();
   };
+
+  const size = opacity.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 80],
+  });
+
+  const animatedStyles = [
+    styles.box,
+    {
+      opacity,
+      width: size,
+      height: size,
+    },
+  ];
 
   return (
-    <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-      <FlatList
-        style={{flexGrow: 0}}
-        ref={flastListRef}
-        initialScrollIndex={index}
-        data={data}
-        keyExtractor={item => item.key}
-        contentContainerStyle={{paddingLeft: _spacing}}
-        showsHorizontalScrollIndicator={false}
-        horizontal
-        renderItem={item => renderItem(item)}
-      />
-      <View
-        style={{
-          alignItems: 'center',
-          flexDirection: 'row',
-          marginTop: _spacing * 10,
-        }}>
-        <View style={{alignItems: 'center'}}>
-          <Text
-            style={{
-              color: '#36303F',
-              fontWeight: '700',
-              marginBottom: _spacing,
-            }}>
-            Scroll position
-          </Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              width: gui.screenWidth / 2,
-              justifyContent: 'center',
-            }}>
-            <TouchableOpacity onPress={() => {}}>
-              <View
-                style={{
-                  padding: _spacing,
-                  backgroundColor: '#FCD259',
-                  borderRadius: _spacing,
-                  marginRight: _spacing,
-                }}>
-                <FontAwesome name="align-left" size={24} color="#36303F" />
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => {}}>
-              <View
-                style={{
-                  padding: _spacing,
-                  backgroundColor: '#FCD259',
-                  borderRadius: _spacing,
-                  marginRight: _spacing,
-                }}>
-                <FontAwesome
-                  name="align-horizontal-middle"
-                  size={24}
-                  color="#36303F"
-                />
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => {}}>
-              <View
-                style={{
-                  padding: _spacing,
-                  backgroundColor: '#FCD259',
-                  borderRadius: _spacing,
-                }}>
-                <FontAwesome name="align-right" size={24} color="#36303F" />
-              </View>
-            </TouchableOpacity>
-          </View>
-        </View>
-        <View style={{alignItems: 'center'}}>
-          <Text style={{color: '#36303F', fontWeight: '700', marginBottom: 10}}>
-            Navigation
-          </Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              width: gui.screenWidth / 2,
-              justifyContent: 'center',
-            }}>
-            <TouchableOpacity
-              onPress={() => {
-                if (index === 0) {
-                  return;
-                }
-                setIndex(index - 1);
-              }}>
-              <View
-                style={{
-                  padding: _spacing,
-                  backgroundColor: '#FCD259',
-                  borderRadius: _spacing,
-                  marginRight: _spacing,
-                }}>
-                <FontAwesome name="arrow-left" size={24} color="#36303F" />
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                if (index === data.length - 1) {
-                  return;
-                }
-                setIndex(index + 1);
-              }}>
-              <View
-                style={{
-                  padding: _spacing,
-                  backgroundColor: '#FCD259',
-                  borderRadius: _spacing,
-                }}>
-                <FontAwesome name="arrow-right" size={24} color="#36303F" />
-              </View>
-            </TouchableOpacity>
-          </View>
-        </View>
+    <View style={styles.container}>
+      <StatusBar hidden={true} />
+      <Text style={styles.title}>Press rows below to preview the Easing!</Text>
+      <View style={styles.boxContainer}>
+        <Animated.View style={animatedStyles} />
       </View>
+      <SectionList
+        style={styles.list}
+        sections={SECTIONS}
+        keyExtractor={item => item.title}
+        renderItem={({item}) => (
+          <TouchableOpacity
+            onPress={() => animate(item.easing)}
+            style={styles.listRow}>
+            <Text>{item.title}</Text>
+          </TouchableOpacity>
+        )}
+        renderSectionHeader={({section: {title}}) => (
+          <Text style={styles.listHeader}>{title}</Text>
+        )}
+      />
     </View>
   );
 };
+
+const SECTIONS = [
+  {
+    title: 'Predefined animations',
+    data: [
+      {title: 'Bounce', easing: Easing.bounce},
+      {title: 'Ease', easing: Easing.ease},
+      {title: 'Elastic', easing: Easing.elastic(4)},
+    ],
+  },
+  {
+    title: 'Standard functions',
+    data: [
+      {title: 'Linear', easing: Easing.linear},
+      {title: 'Quad', easing: Easing.quad},
+      {title: 'Cubic', easing: Easing.cubic},
+    ],
+  },
+  {
+    title: 'Additional functions',
+    data: [
+      {
+        title: 'Bezier',
+        easing: Easing.bezier(0, 2, 1, -1),
+      },
+      {title: 'Circle', easing: Easing.circle},
+      {title: 'Sin', easing: Easing.sin},
+      {title: 'Exp', easing: Easing.exp},
+    ],
+  },
+  {
+    title: 'Combinations',
+    data: [
+      {
+        title: 'In + Bounce',
+        easing: Easing.in(Easing.bounce),
+      },
+      {
+        title: 'Out + Exp',
+        easing: Easing.out(Easing.exp),
+      },
+      {
+        title: 'InOut + Elastic',
+        easing: Easing.inOut(Easing.elastic(1)),
+      },
+    ],
+  },
+];
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#20232a',
+  },
+  title: {
+    marginTop: 10,
+    textAlign: 'center',
+    color: '#61dafb',
+  },
+  boxContainer: {
+    height: 160,
+    alignItems: 'center',
+  },
+  box: {
+    marginTop: 32,
+    borderRadius: 4,
+    backgroundColor: '#61dafb',
+  },
+  list: {
+    backgroundColor: '#fff',
+  },
+  listHeader: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: '#f4f4f4',
+    color: '#999',
+    fontSize: 12,
+    textTransform: 'uppercase',
+  },
+  listRow: {
+    padding: 8,
+  },
+});
 
 export default List;
